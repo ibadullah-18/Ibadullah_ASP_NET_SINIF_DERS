@@ -1,0 +1,17 @@
+﻿@model Product
+<h1>Create</h1>
+<form action="Create" method="post">
+    <p>
+        @Html.DisplayNameFor(model => model.Name)
+        <input asp-for="Name"/>
+        <span asp-validation-for="Name"></span>
+    </p>
+    <p>
+        @Html.DisplayNameFor(model => model.Price)
+        <input asp-for="Price" />
+        <span asp-validation-for="Price"></span>
+    </p>
+    <p>
+        <input type="submit" value="Create" />
+    </p>
+</form>
