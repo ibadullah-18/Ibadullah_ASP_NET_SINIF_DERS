@@ -1,0 +1,133 @@
+﻿@using ASP_NET_05._Html_Helpers.HtmHelpers
+@model User
+@{
+    ViewData["Title"] = "Home Page";
+    Random random = new Random();
+
+    List<string> students = new()
+    {
+        "Gülçin",
+        "Firidun",
+        "İbadulla",
+        "Sufiyə",
+        "Akif",
+        "Hüseyn",
+        "Gülay"
+    };
+
+    List<User> users = new()
+{
+    new User { Id = 1,  Login = "Madura",        Password = "TrampSendenQorxmuram" },
+    new User { Id = 2,  Login = "Neo",           Password = "MatrixIsReal" },
+    new User { Id = 3,  Login = "Trinity",       Password = "FollowTheWhiteRabbit" },
+    new User { Id = 4,  Login = "Morpheus",      Password = "FreeYourMind" },
+    new User { Id = 5,  Login = "AgentSmith",    Password = "HumanVirus" },
+    new User { Id = 6,  Login = "Batman",        Password = "IamTheNight" },
+    new User { Id = 7,  Login = "Joker",         Password = "WhySoSerious" },
+    new User { Id = 8,  Login = "IronMan",       Password = "IAmIronMan" },
+    new User { Id = 9,  Login = "Thor",          Password = "GodOfThunder" },
+    new User { Id = 10, Login = "Loki",          Password = "GodOfMischief" },
+    new User { Id = 11, Login = "Gandalf",       Password = "YouShallNotPass" },
+    new User { Id = 12, Login = "Frodo",         Password = "OneRing" },
+    new User { Id = 13, Login = "Aragorn",       Password = "ForGondor" },
+    new User { Id = 14, Login = "Geralt",        Password = "WhiteWolf" },
+    new User { Id = 15, Login = "Kratos",        Password = "Boy" }
+};
+
+}
+
+<div class="text-center">
+    @* <form method="get" action="/Home/Privacy">
+        <input type="hidden"  value="@random.Next(1, 1000)" name="Id"/>
+        <p>
+            <label for="Login">Login</label>
+        </p>
+           <p>
+               <input type="text" name="Login"/>
+           </p>
+        <p>
+            <label for="Password">Password</label>
+        </p>
+        <p>
+            <input type="password" name="Password" />
+        </p>
+
+        <input type="submit" value="Send"/>
+    </form> *@
+
+    @* @using (Html.BeginForm("Privacy", "Home", FormMethod.Get))
+    {
+        @Html.Hidden("Id", random.Next(1, 1000))
+
+        <p>
+            @Html.LabelFor(m=>m.Login)
+        </p>
+        <p>
+            @Html.TextBox("Login")
+        </p>
+        <p>
+            @Html.LabelFor(m => m.Password)
+        </p>
+        <p>
+           @Html.Password("Password")
+        </p>
+        <input type="submit" value="Send" />
+
+        <p>
+            @Html.DropDownList("Students", new SelectList(students))
+            @Html.ListBox("Students", new MultiSelectList(students))
+        </p>
+
+        <p>
+            @Html.Label("Choban")
+            @Html.RadioButton("Salats", "Choban")
+            <br/>
+            @Html.Label("Yunan")
+            @Html.RadioButton("Salats", "Yunan")
+            <br />
+            @Html.Label("Sezar")
+            @Html.RadioButton("Salats", "Sezar")
+            <br />
+        </p>
+    } *@
+
+    @* <form method="get" asp-action="Privacy" asp-controller="Home">
+        <input type="hidden"  value="@random.Next(1, 1000)" name="Id"/>
+        <p>
+            <label asp-for="Login">Login</label>
+        </p>
+           <p>
+               <input type="text" asp-for="Login"/>
+           </p>
+        <p>
+            <label asp-for="Password">Password</label>
+        </p>
+        <p>
+            <input type="password" asp-for="Password" />
+        </p>
+
+        <input type="submit" value="Send"/>
+    </form> *@
+
+
+   @*  <ol style="color:red; font-size:20px;">
+        @foreach (var student in students)
+        {
+            <li>@student</li>
+        }
+    </ol>
+
+    <ul style="color:blue; font-size:10px;">
+        @foreach (var user in users)
+        {
+            <li>@user</li>
+        }
+    </ul> *@
+
+   @*  @Html.ListFor(students, color:"red", fontSize:"20")
+
+    @Html.ListFor(users, color: "blue", fontSize: "10", listTag:"ul") *@
+
+    @Html.MyForm(action:"Privacy", controller:"Home", buttonText:"Log in")
+
+</div>

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.13.35825.156
+# Visual Studio Version 18
+VisualStudioVersion = 18.2.11408.102 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASP NET 01. Web App example", "ASP NET 01. Web App example\ASP NET 01. Web App example.csproj", "{50C01C8B-B9B7-4C2B-85BF-CA5246ECBBD2}"
 EndProject
@@ -34,6 +34,12 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASP NET 04. MVC Product site", "ASP NET 04. MVC Product site\ASP NET 04. MVC Product site.csproj", "{7C5B530D-E264-4E30-9445-215FA2B236B2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASP NET 04. MVC Product Site - Scaffold", "ASP NET 04. MVC Product Site - Scaffold\ASP NET 04. MVC Product Site - Scaffold.csproj", "{65244327-0964-424C-88E8-FACD191A6F51}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ASP NET 05", "ASP NET 05", "{5E268FF4-EBA9-4527-94E7-B8DFF5A6E476}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASP NET 05. ASP Filters", "ASP NET 05. ASP Filters\ASP NET 05. ASP Filters.csproj", "{E9FC34B4-2F8C-4934-8CDB-2E12C7A1F6D4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASP NET 05. Html Helpers", "ASP NET 05. Html Helpers\ASP NET 05. Html Helpers.csproj", "{2CE76C7D-0521-4E4E-925D-3A61D5B7902A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -89,6 +95,14 @@ Global
 		{65244327-0964-424C-88E8-FACD191A6F51}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{65244327-0964-424C-88E8-FACD191A6F51}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{65244327-0964-424C-88E8-FACD191A6F51}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E9FC34B4-2F8C-4934-8CDB-2E12C7A1F6D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E9FC34B4-2F8C-4934-8CDB-2E12C7A1F6D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E9FC34B4-2F8C-4934-8CDB-2E12C7A1F6D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E9FC34B4-2F8C-4934-8CDB-2E12C7A1F6D4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2CE76C7D-0521-4E4E-925D-3A61D5B7902A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2CE76C7D-0521-4E4E-925D-3A61D5B7902A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2CE76C7D-0521-4E4E-925D-3A61D5B7902A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2CE76C7D-0521-4E4E-925D-3A61D5B7902A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -106,6 +120,8 @@ Global
 		{1B42D528-9A7C-490D-AFA9-EE2F5B80AEB7} = {534BA917-6701-48B7-9972-C3242930E6CC}
 		{7C5B530D-E264-4E30-9445-215FA2B236B2} = {9322630A-91BF-44FE-A6B8-7609F137D538}
 		{65244327-0964-424C-88E8-FACD191A6F51} = {9322630A-91BF-44FE-A6B8-7609F137D538}
+		{E9FC34B4-2F8C-4934-8CDB-2E12C7A1F6D4} = {5E268FF4-EBA9-4527-94E7-B8DFF5A6E476}
+		{2CE76C7D-0521-4E4E-925D-3A61D5B7902A} = {5E268FF4-EBA9-4527-94E7-B8DFF5A6E476}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {497B41C6-99E9-4EFF-B1E0-382CB277FD5D}
