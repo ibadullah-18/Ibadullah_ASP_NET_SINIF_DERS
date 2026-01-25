@@ -1,7 +1,5 @@
 ﻿using ASP_NET_07._TaskFlow_Introduction.Models;
-using ASP_NET_07._TaskFlow_Introduction.Services;
 using ASP_NET_07._TaskFlow_Introduction.Services.Interfaces;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ASP_NET_07._TaskFlow_Introduction.Controllers;
@@ -34,9 +32,10 @@ public class TaskItemsController : ControllerBase
     }
 
     [HttpGet("project/{projectId}")]
-    public async Task<ActionResult<TaskItem>> GetByProjectId(int projectId)
+    public async Task<ActionResult<IEnumerable<TaskItem>>> GetByProjectId(int projectId)
     {
-        return Ok();
+        var tasks = await _taskItemService.GetByProjectIdAsync(projectId);
+        return Ok(tasks);
     }
     [HttpPost]
     public async Task<ActionResult<TaskItem>> Create([FromBody] TaskItem taskItem)
@@ -59,12 +58,24 @@ public class TaskItemsController : ControllerBase
     [HttpPut("{id}")]
     public async Task<ActionResult<TaskItem>> Update(int id, [FromBody] TaskItem taskItem)
     {
-        return Ok();
+        if(!ModelState.IsValid) 
+            return BadRequest(ModelState);
+        var task = await _taskItemService.UpdateAsync(id, taskItem);
+
+        if (task is null)
+            return NotFound($"Task Item with ID {id} not found");
+
+        return Ok(task);
     }
 
     [HttpDelete("{id}")]
-    public async Task<ActionResult<TaskItem>> Delete(int id)
-    {    
+    public async Task<ActionResult> Delete(int id)
+    {
+        var isDeleted = await _taskItemService.DeleteAsync(id);
+
+        if(!isDeleted) 
+            return NotFound($"Task Item with ID {id} not found");
+
         return NoContent();
     }
 }
