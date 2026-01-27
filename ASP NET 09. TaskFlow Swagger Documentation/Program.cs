@@ -30,7 +30,7 @@ builder.Services.AddSwaggerGen(
             {
                 Name = "MIT Licence",
                 Url = new Uri("https://opensource.org/license/mit")
-            }
+            },
         });
 
         var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
