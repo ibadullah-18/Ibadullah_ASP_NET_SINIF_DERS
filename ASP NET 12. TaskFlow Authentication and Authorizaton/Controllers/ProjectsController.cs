@@ -27,6 +27,8 @@ public class ProjectsController : ControllerBase
     /// <response code="200">Projects were successfully retrieved.</response>
     [HttpGet]
     [ProducesResponseType(typeof(ApiResponse<IEnumerable<ProjectResponseDto>>), StatusCodes.Status200OK)]
+    //[Authorize(Roles ="Admin, Manager, User")]
+    [Authorize(Policy ="UserOrAbove")]
     public async Task<ActionResult<ApiResponse<IEnumerable<ProjectResponseDto>>>> GetAll()
     {
         var projects = await _projectService.GetAllAsync();
@@ -43,6 +45,8 @@ public class ProjectsController : ControllerBase
     [HttpGet("{id:int}")]
     [ProducesResponseType(typeof(ApiResponse<ProjectResponseDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<ProjectResponseDto>), StatusCodes.Status404NotFound)]
+    //[Authorize(Roles ="Admin, Manager, User")]
+    [Authorize(Policy = "UserOrAbove")]
     public async Task<ActionResult<ApiResponse<ProjectResponseDto>>> GetById(int id)
     {
         var project = await _projectService.GetByIdAsync(id);
@@ -63,7 +67,8 @@ public class ProjectsController : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(ApiResponse<ProjectResponseDto>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ApiResponse<ProjectResponseDto>), StatusCodes.Status400BadRequest)]
-    [Authorize]
+    //[Authorize(Roles = "Admin, Manager")]
+    [Authorize(Policy ="AdminOrManager")]
     public async Task<ActionResult<ApiResponse<ProjectResponseDto>>> Create([FromBody] CreateProjectRequest createProjectRequest)
     {
         if (!ModelState.IsValid)
@@ -91,6 +96,8 @@ public class ProjectsController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<ProjectResponseDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<ProjectResponseDto>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiResponse<ProjectResponseDto>), StatusCodes.Status404NotFound)]
+    //[Authorize(Roles = "Admin, Manager")]
+    [Authorize(Policy = "AdminOrManager")]
     public async Task<ActionResult<ApiResponse<ProjectResponseDto>>> Update(
         int id,
         [FromBody] UpdateProjectRequest updateProjectRequest)
@@ -116,6 +123,8 @@ public class ProjectsController : ControllerBase
     [HttpDelete("{id:int}")]
     [ProducesResponseType(typeof(ApiResponse<object?>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<object?>), StatusCodes.Status404NotFound)]
+    //[Authorize(Roles = "Admin")]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<ActionResult<ApiResponse<object?>>> Delete(int id)
     {
         var deleted = await _projectService.DeleteAsync(id);

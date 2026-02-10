@@ -6,9 +6,6 @@ public class ApiResponse<T>
     public string Message { get; set; } = string.Empty;
     public T? Data { get; set; }
 
-    public object? Errors { get; set; }
-
-    public long? ExecutionTimeMs { get; set; }
 
     public static ApiResponse<T> SuccessResponse(
         T? data,
@@ -19,7 +16,6 @@ public class ApiResponse<T>
             Success = true,
             Message = message,
             Data = data,
-            ExecutionTimeMs = executionTimeMs
         };
 
     public static ApiResponse<T> ErrorResponse(
@@ -31,7 +27,5 @@ public class ApiResponse<T>
             Success = false,
             Message = message,
             Data = default,
-            Errors = errors,
-            ExecutionTimeMs = executionTimeMs
         };
 }

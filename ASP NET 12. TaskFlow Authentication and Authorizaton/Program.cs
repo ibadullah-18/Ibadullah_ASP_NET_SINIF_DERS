@@ -5,10 +5,13 @@ using ASP_NET_12._TaskFlow_Authentication_and_Authorizaton.Models;
 using ASP_NET_12._TaskFlow_Authentication_and_Authorizaton.Services;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +43,31 @@ builder.Services.AddSwaggerGen(
         var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
 
         if (File.Exists(xmlPath)) options.IncludeXmlComments(xmlPath);
+
+
+        options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+        {
+            Description = "JWT Authorization header using Bearer scheme.\r\n\r\n Example: Bearer {token}",
+            Name = "Authorization",
+            In = ParameterLocation.Header,
+            Type = SecuritySchemeType.ApiKey,
+            Scheme = "Bearer",
+            BearerFormat = "JWT"
+        });
+
+        options.AddSecurityRequirement(new OpenApiSecurityRequirement
+        {
+            {
+                new OpenApiSecurityScheme
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id="Bearer"
+                    }
+                },new string[]{}
+            }
+        });
     }
     );
 
@@ -51,20 +79,59 @@ builder.Services.AddDbContext<TaskFlowDbContext>(
     options => options.UseSqlServer(connectionString)
     );
 
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(
+    options =>
+    {
+        options.Password.RequireNonAlphanumeric = false;
+    }
+    )
     .AddEntityFrameworkStores<TaskFlowDbContext>();
+
+// JWT config for Authentication
+var jwtSettings = builder.Configuration.GetSection("JWTSettings");
+var secretKey = jwtSettings["SecretKey"];
+var audience = jwtSettings["Audience"];
+var issuer = jwtSettings["Issuer"];
+
+builder.Services
+    .AddAuthentication(
+    options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(
+    options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = issuer,
+            ValidAudience = audience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey!)),
+            ClockSkew = TimeSpan.Zero
+        };
+    }
+    );
+
+// Authorization Policies
+builder.Services.AddAuthorization(
+    options =>
+    {
+        options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+        options.AddPolicy("AdminorManager", policy => policy.RequireRole("Admin", "Manager"));
+        options.AddPolicy("UserOrAbove", policy => policy.RequireRole("Admin", "Manager", "User"));
+    }
+    );
 
 // Services
 builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<ITaskItemService, TaskItemService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
-
-#region FluentValidation DI
-//builder.Services.AddScoped<IValidator<CreateProjectRequest>, CreateProjectValidator>();
-//builder.Services.AddScoped<IValidator<UpdateProjectRequest>, UpdateProjectValidator>();
-//builder.Services.AddScoped<IValidator<CreateTaskItemRequest>, CreateTaskItemValidator>();
-//builder.Services.AddScoped<IValidator<UpdateTaskItemRequest>, UpdateTaskItemValidator>();
-#endregion
 
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
@@ -78,7 +145,7 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI(
-        options=>
+        options =>
         {
             options.SwaggerEndpoint("/swagger/v1/swagger.json", "TaskFlow API v1");
             options.RoutePrefix = string.Empty;
@@ -90,8 +157,26 @@ if (app.Environment.IsDevelopment())
         );
 }
 app.UseMiddleware<GlobalExceptionMiddleware>();
+
+app.UseAuthentication();
+
 app.UseAuthorization();
 
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        await RoleSeeder.SeedRolesAsync(services);
+    }
+    catch (Exception ex)
+    {
+
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occured while seeding roles");
+    }
+}
 
 app.Run();
