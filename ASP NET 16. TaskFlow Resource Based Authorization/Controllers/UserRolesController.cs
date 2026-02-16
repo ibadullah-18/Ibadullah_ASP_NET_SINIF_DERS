@@ -70,12 +70,76 @@ public class UserRolesController : ControllerBase
     [HttpPost("{userId}/roles")]
     public async Task<ActionResult<ApiResponse<UserWithRolesDto>>> AssignRole(string userId,[FromBody] AssignRoleRequest request)
     {
-        throw new NotImplementedException();
+        var user = await _userManager.FindByIdAsync(userId);
+
+        if (user is null) 
+        {
+            return NotFound(ApiResponse<string>.ErrorResponse($"User with ID {userId} not found")); 
+        
+        }
+            
+
+
+        var userRoles = await _userManager.GetRolesAsync(user);
+        if (userRoles.Contains(request.Role)) 
+        {  
+            return BadRequest(ApiResponse<string>.ErrorResponse($"User already has role '{request.Role}'"));
+        }
+          
+
+        var result = await _userManager.AddToRoleAsync(user, request.Role);
+
+        if (!result.Succeeded) {
+            return BadRequest(ApiResponse<string>.ErrorResponse("Failed to assign role"));
+        }
+            
+
+
+        var updatedRoles = await _userManager.GetRolesAsync(user);
+
+        var response = new UserWithRolesDto
+        {
+            Id = user.Id,
+            Email = user.Email!,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Roles = updatedRoles.ToList()
+        };
+
+        return Ok(ApiResponse<UserWithRolesDto>.SuccessResponse(response, "Role assigned successfully"));
     }
+
+
 
     [HttpDelete("{userId}/roles/{roleName}")]
     public async Task<ActionResult<ApiResponse<UserWithRolesDto>>> RemoveRole(string userId, string roleName)
     {
-        throw new NotImplementedException();
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user is null)
+        {
+            return NotFound(ApiResponse<string>.ErrorResponse($"User with ID {userId} not found"));
+        }
+            
+
+        var result = await _userManager.RemoveFromRoleAsync(user, roleName);
+
+        if (!result.Succeeded)
+        {
+            return BadRequest(ApiResponse<string>.ErrorResponse("Failed to remove role"));
+        }
+            
+
+        var updatedRoles = await _userManager.GetRolesAsync(user);
+
+        var response = new UserWithRolesDto
+        {
+            Id = user.Id,
+            Email = user.Email!,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Roles = updatedRoles.ToList()
+        };
+
+        return Ok(ApiResponse<UserWithRolesDto>.SuccessResponse(response, "Role removed successfully"));
     }
 }
