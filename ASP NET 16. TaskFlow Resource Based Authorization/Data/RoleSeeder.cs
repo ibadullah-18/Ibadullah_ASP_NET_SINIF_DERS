@@ -18,8 +18,8 @@ public static class RoleSeeder
                 await roleManager.CreateAsync(new IdentityRole(role));
         }
 
-        var adminEmail = "admin@taskflow.com";
-        var adminPassword = "Admin123!";
+        var adminEmail = "ibadullah@gmail.com";
+        var adminPassword = "Ibad2007!";
 
         if (await userManager.FindByEmailAsync(adminEmail) is null)
         {
@@ -27,8 +27,8 @@ public static class RoleSeeder
             {
                 UserName = adminEmail,
                 Email = adminEmail,
-                FirstName = "Zaman",
-                LastName = "Nadirov",
+                FirstName = "Ibadullah",
+                LastName = "Huseynzade",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = null
             };

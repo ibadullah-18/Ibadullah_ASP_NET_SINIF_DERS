@@ -1,4 +1,5 @@
 using ASP_NET_16._TaskFlow_Resource_Based_Authorization.Authorization;
+using ASP_NET_16._TaskFlow_Resource_Based_Authorization.Config;
 using ASP_NET_16._TaskFlow_Resource_Based_Authorization.Data;
 using ASP_NET_16._TaskFlow_Resource_Based_Authorization.Mappings;
 using ASP_NET_16._TaskFlow_Resource_Based_Authorization.Middleware;
@@ -105,10 +106,9 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(
     .AddDefaultTokenProviders();
 
 // JWT Authentication
-var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-var secretKey = jwtSettings["SecretKey"];
-var issuer = jwtSettings["Issuer"];
-var audience = jwtSettings["Audience"];
+var jwtConfig = new JwtConfig();
+
+builder.Configuration.GetSection(JwtConfig.SectionName).Bind(jwtConfig);
 
 builder.Services.AddAuthentication(
     options =>
@@ -126,9 +126,9 @@ builder.Services.AddAuthentication(
                 ValidateAudience = true,
                 ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
-                ValidIssuer = issuer,
-                ValidAudience = audience,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey!)),
+                ValidIssuer = jwtConfig.Issuer,
+                ValidAudience = jwtConfig.Audience,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfig.SecretKey)),
                 ClockSkew = TimeSpan.Zero
             };
         }
@@ -222,6 +222,7 @@ if (app.Environment.IsDevelopment())
             options.DisplayRequestDuration();
             options.EnableFilter();
             options.EnableDeepLinking();
+            options.EnableTryItOutByDefault();
             options.EnableTryItOutByDefault();
         }
         );

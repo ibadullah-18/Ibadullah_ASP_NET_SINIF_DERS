@@ -83,7 +83,11 @@ public class TaskItemsController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<TaskItemResponseDto>), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ApiResponse<TaskItemResponseDto>>> GetById(int id)
     {
-        var project = await _projectService.GetProjectEntityAsync(id);
+        var taskEntity = await _taskItemService.GetTaskEntityAsync(id);
+        if (taskEntity is null)
+            return NotFound($"Task item with ID {id} not found");
+
+        var project = await _projectService.GetProjectEntityAsync(taskEntity.ProjectId);
 
         if (project is null) return NotFound();
 
@@ -177,8 +181,11 @@ public class TaskItemsController : ControllerBase
     {
         if (!ModelState.IsValid)
             return BadRequest(ApiResponse<TaskItemResponseDto>.ErrorResponse("Validation failed", ToValidationErrors(ModelState)));
+        var taskEntity = await _taskItemService.GetTaskEntityAsync(id);
+        if (taskEntity is null)
+            return NotFound($"Task item with ID {id} not found");
 
-        var project = await _projectService.GetProjectEntityAsync(id);
+        var project = await _projectService.GetProjectEntityAsync(taskEntity.ProjectId);
 
         if (project is null) return NotFound();
 
@@ -201,11 +208,11 @@ public class TaskItemsController : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(ApiResponse<TaskItemResponseDto>.ErrorResponse("Validation failed", ToValidationErrors(ModelState)));
 
-        var project = await _projectService.GetProjectEntityAsync(id);
+        var taskEntity = await _taskItemService.GetTaskEntityAsync(id);
+        if (taskEntity is null)
+            return NotFound($"Task item with ID {id} not found");
 
-        if (project is null) return NotFound();
-
-        var authResult = await _authorizationService.AuthorizeAsync(User, project, "TaskStatusChange");
+        var authResult = await _authorizationService.AuthorizeAsync(User, taskEntity, "TaskStatusChange");
 
         if (authResult is null) return Forbid();
 
@@ -233,7 +240,11 @@ public class TaskItemsController : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(ApiResponse<TaskItemResponseDto>.ErrorResponse("Validation failed", ToValidationErrors(ModelState)));
 
-        var project = await _projectService.GetProjectEntityAsync(id);
+        var taskEntity = await _taskItemService.GetTaskEntityAsync(id);
+        if (taskEntity is null)
+            return NotFound($"Task item with ID {id} not found");
+
+        var project = await _projectService.GetProjectEntityAsync(taskEntity.ProjectId);
 
         if (project is null) return NotFound();
 

@@ -70,6 +70,13 @@ public class UserRolesController : ControllerBase
     [HttpPost("{userId}/roles")]
     public async Task<ActionResult<ApiResponse<UserWithRolesDto>>> AssignRole(string userId,[FromBody] AssignRoleRequest request)
     {
+        var roleName = request.Role.Trim();
+
+        if (!await _roleManager.RoleExistsAsync(roleName))
+        {
+            return BadRequest(ApiResponse<string>.ErrorResponse($"Role '{roleName}' does not exist"));
+        }
+
         var user = await _userManager.FindByIdAsync(userId);
 
         if (user is null) 
@@ -86,6 +93,11 @@ public class UserRolesController : ControllerBase
             return BadRequest(ApiResponse<string>.ErrorResponse($"User already has role '{request.Role}'"));
         }
           
+        var roleExists = await _roleManager.RoleExistsAsync(request.Role);
+        if (!roleExists)
+        {
+            return BadRequest(ApiResponse<string>.ErrorResponse($"Role '{request.Role}' does not exist"));
+        }
 
         var result = await _userManager.AddToRoleAsync(user, request.Role);
 
@@ -114,12 +126,24 @@ public class UserRolesController : ControllerBase
     [HttpDelete("{userId}/roles/{roleName}")]
     public async Task<ActionResult<ApiResponse<UserWithRolesDto>>> RemoveRole(string userId, string roleName)
     {
+        roleName = roleName.Trim();
+
         var user = await _userManager.FindByIdAsync(userId);
         if (user is null)
         {
             return NotFound(ApiResponse<string>.ErrorResponse($"User with ID {userId} not found"));
         }
-            
+
+        var roleExists = await _roleManager.RoleExistsAsync(roleName);
+        if (!roleExists)
+        {
+            return BadRequest(ApiResponse<string>.ErrorResponse($"Role '{roleName}' does not exist"));
+        }
+
+        if (!await _userManager.IsInRoleAsync(user, roleName))
+        {
+            return BadRequest(ApiResponse<string>.ErrorResponse($"User is not in role '{roleName}'"));
+        }
 
         var result = await _userManager.RemoveFromRoleAsync(user, roleName);
 
