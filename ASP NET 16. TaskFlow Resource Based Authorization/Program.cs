@@ -181,6 +181,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAuthorizationHandler, ProjectOwnerOrAdminHandler>();
 builder.Services.AddScoped<IAuthorizationHandler, ProjectMemberOrHigherHandler>();
 builder.Services.AddScoped<IAuthorizationHandler, TaskStatusChangeHandler>();
+builder.Services.Configure<JwtConfig>(builder.Configuration.GetSection(JwtConfig.SectionName));
 
 #region FluentValidation DI
 //builder.Services.AddScoped<IValidator<CreateProjectRequest>, CreateProjectValidator>();
