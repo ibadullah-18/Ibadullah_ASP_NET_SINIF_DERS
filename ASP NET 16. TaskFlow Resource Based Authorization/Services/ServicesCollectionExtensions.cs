@@ -15,6 +15,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
 using System.Text;
+using ASP_NET_16._TaskFlow_Resource_Based_Authorization.Storage;
 
 public static class ServiceCollectionExtensions
 {
@@ -199,6 +200,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAuthorizationHandler, ProjectMemberOrHigherHandler>();
         services.AddScoped<IAuthorizationHandler, TaskStatusChangeHandler>();
 
+
         return services;
 
     }
@@ -238,6 +240,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IProjectService, ProjectService>();
         services.AddScoped<ITaskItemService, TaskItemService>();
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IFileStorage, LocalDiskStorage>();
+        services.AddScoped<IAttacmentService, AttachmentService>();
 
         return services;
 

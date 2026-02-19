@@ -15,6 +15,8 @@ public class TaskItem
     
     //navigation property
     public Project Project { get; set; } = null!;
+
+    public ICollection<TaskAttachment> Attachments { get; set; } = new List<TaskAttachment>();
 }
 
 public enum TaskStatus

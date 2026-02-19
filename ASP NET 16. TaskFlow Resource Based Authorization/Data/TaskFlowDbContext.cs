@@ -13,6 +13,7 @@ public class TaskFlowDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<TaskItem> TaskItems => Set<TaskItem>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<ProjectMember> ProjectMembers => Set<ProjectMember>();
+    public DbSet<TaskAttachment> TaskAttachments => Set<TaskAttachment>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -93,6 +94,34 @@ public class TaskFlowDbContext : IdentityDbContext<ApplicationUser>
                     .OnDelete(DeleteBehavior.Cascade);
                 member.Property(m => m.UserId)
                     .HasMaxLength(450);
+            }
+            );
+
+        // Task Attachment
+        modelBuilder.Entity<TaskAttachment>(
+            attachment =>
+            {
+                attachment.HasKey(a => a.Id);
+                attachment.Property(a => a.OriginalFileName)
+                    .IsRequired()
+                    .HasMaxLength(500);
+                attachment.Property(a => a.StoredFileName)
+                    .IsRequired()
+                    .HasMaxLength(100);
+                attachment.Property(a => a.ContentType)
+                    .IsRequired()
+                    .HasMaxLength(200);
+                attachment.Property(a => a.UploadedUserId)
+                    .IsRequired()
+                    .HasMaxLength(450);
+                attachment.HasOne(a => a.TaskItem)
+                    .WithMany(t => t.Attachments)
+                    .HasForeignKey(a => a.TaskItemId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                attachment.HasOne(a => a.UploadedUser)
+                    .WithMany()
+                    .HasForeignKey(a => a.UploadedUserId)
+                    .OnDelete(DeleteBehavior.Restrict);
             }
             );
     }
