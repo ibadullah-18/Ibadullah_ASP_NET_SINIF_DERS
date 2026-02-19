@@ -3,20 +3,25 @@ using ASP_NET_16._TaskFlow_Resource_Based_Authorization.Config;
 using ASP_NET_16._TaskFlow_Resource_Based_Authorization.Data;
 using ASP_NET_16._TaskFlow_Resource_Based_Authorization.Mappings;
 using ASP_NET_16._TaskFlow_Resource_Based_Authorization.Models;
+using ASP_NET_16._TaskFlow_Resource_Based_Authorization.Services;
 using ASP_NET_16._TaskFlow_Resource_Based_Authorization.Validators;
-using FluentValidation;
 using FluentValidation.AspNetCore;
+using FluentValidation;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
+using System.Text;
 
-namespace ASP_NET_16._TaskFlow_Resource_Based_Authorization.Services;
-
-public static class ServicesCollectionExtensions
+public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddSwagger(this IServiceCollection services)
+
+    public static IServiceCollection AddSwagger(
+        this IServiceCollection services
+        )
     {
         services.AddControllers();
 
@@ -78,49 +83,68 @@ public static class ServicesCollectionExtensions
 
     );
         return services;
-
     }
 
-    public static IServiceCollection AddTaskFlowDbContext(this IServiceCollection services, IConfiguration configuration)
+
+    public static IServiceCollection AddTaskFlowDbContext(
+        this IServiceCollection services,
+        IConfiguration configuration)
     {
         var connectionString = configuration
                         .GetConnectionString("DefaultConnectionString");
+
         services.AddDbContext<TaskFlowDbContext>(
-        options => options.UseSqlServer(connectionString));
-
+            options => options.UseSqlServer(connectionString)
+            );
         return services;
     }
 
-    public static IServiceCollection AddIdentityAndDb(this IServiceCollection services , IConfiguration configuration)
+    public static IServiceCollection AddIdentityAndDb(
+        this IServiceCollection services,
+        IConfiguration configuration)
     {
-        services.Configure<JwtConfig>(configuration.GetSection(JwtConfig.SectionName));
-        services.AddIdentityCore<ApplicationUser>(options =>
-        {
-            options.Password.RequireDigit = true;
-            options.Password.RequireLowercase = true;
-            options.Password.RequireUppercase = true;
-            options.Password.RequiredLength = 6;
-        })
-            .AddEntityFrameworkStores<TaskFlowDbContext>()
-            .AddDefaultTokenProviders();
+        services
+            .Configure<JwtConfig>(configuration.GetSection(JwtConfig.SectionName));
+
+        services.AddIdentity<ApplicationUser, IdentityRole>(
+    options =>
+    {
+        options.Password.RequireDigit = false;
+        options.Password.RequireLowercase = false;
+        options.Password.RequireUppercase = false;
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequiredLength = 6;
+
+        options.User.RequireUniqueEmail = true;
+        options.SignIn.RequireConfirmedEmail = false;
+    }
+
+)
+    .AddEntityFrameworkStores<TaskFlowDbContext>()
+    .AddDefaultTokenProviders();
         return services;
     }
 
-    public static IServiceCollection  AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddJwtAuthenticationAndAuthorization(
+        this IServiceCollection services,
+        IConfiguration configuration)
     {
         var jwtConfig = new JwtConfig();
+
         configuration.GetSection(JwtConfig.SectionName).Bind(jwtConfig);
+
+
         services.AddAuthentication(
             options =>
             {
-                options.DefaultAuthenticateScheme = Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             }
             )
             .AddJwtBearer(
                 options =>
                 {
-                    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                    options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuer = true,
                         ValidateAudience = true,
@@ -128,85 +152,95 @@ public static class ServicesCollectionExtensions
                         ValidateIssuerSigningKey = true,
                         ValidIssuer = jwtConfig.Issuer,
                         ValidAudience = jwtConfig.Audience,
-                        IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(jwtConfig.SecretKey)),
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfig.SecretKey)),
                         ClockSkew = TimeSpan.Zero
                     };
                 }
             );
+
+        // Authorization policies
         services.AddAuthorization(
-        options =>
+            options =>
+            {
+                options.AddPolicy(
+                    "AdminOnly",
+                    policy
+                        => policy.RequireRole("Admin"));
+
+                options.AddPolicy(
+                    "AdminOrManager",
+                    policy
+                        => policy.RequireRole("Admin", "Manager"));
+
+                options.AddPolicy(
+                    "UserOrAbove",
+                    policy
+                        => policy.RequireRole("Admin", "Manager", "User"));
+
+
+                options.AddPolicy(
+                    "ProjectOwnerOrAdmin",
+                        policy =>
+                            policy.Requirements.Add(new ProjectOwnerOrAdminRequirment()));
+
+
+                options.AddPolicy(
+                    "ProjectMemberOrHigher",
+                        policy =>
+                        policy.Requirements.Add(new ProjectMemberOrHigherRequirment()));
+
+
+                options.AddPolicy(
+                    "TaskStatusChange",
+                    policy =>
+                        policy.Requirements.Add(new TaskStatusChangeRequirment()));
+            });
+        services.AddScoped<IAuthorizationHandler, ProjectOwnerOrAdminHandler>();
+        services.AddScoped<IAuthorizationHandler, ProjectMemberOrHigherHandler>();
+        services.AddScoped<IAuthorizationHandler, TaskStatusChangeHandler>();
+
+        return services;
+
+    }
+
+    public static IServiceCollection AddCorsPolicy(
+        this IServiceCollection services)
     {
-        options.AddPolicy(
-            "AdminOnly",
-            policy
-                => policy.RequireRole("Admin"));
-
-        options.AddPolicy(
-            "AdminOrManager",
-            policy
-                => policy.RequireRole("Admin", "Manager"));
-
-        options.AddPolicy(
-            "UserOrAbove",
-            policy
-                => policy.RequireRole("Admin", "Manager", "User"));
-
-
-        options.AddPolicy(
-            "ProjectOwnerOrAdmin",
-                policy =>
-                    policy.Requirements.Add(new ProjectOwnerOrAdminRequirment()));
-
-
-        options.AddPolicy(
-            "ProjectMemberOrHigher",
-                policy =>
-                policy.Requirements.Add(new ProjectMemberOrHigherRequirment()));
-
-
-        options.AddPolicy(
-            "TaskStatusChange",
-            policy =>
-                policy.Requirements.Add(new TaskStatusChangeRequirment()));
+        services.AddCors(
+    optons =>
+    {
+        optons.AddDefaultPolicy(
+            policy => policy.WithOrigins(
+                "http://localhost:3000",
+                "http://127.0.0.1:3000")
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials()
+            );
     }
     );
         return services;
     }
 
-    public static IServiceCollection AddCorsPolicy(this IServiceCollection services)
-    {
-        services.AddCors(
-     optons =>
-     {
-         optons.AddDefaultPolicy(
-             policy => policy.WithOrigins(
-                 "http://localhost:3000",
-                 "http://127.0.0.1:3000")
-             .AllowAnyMethod()
-             .AllowAnyHeader()
-             .AllowCredentials()
-             );
-     }
-     );
-        return services;
-    }
-
-    public static IServiceCollection AddFluentValidation(this IServiceCollection services)
+    public static IServiceCollection AddFluentValidation(
+        this IServiceCollection services)
     {
         services.AddFluentValidationAutoValidation();
         services.AddFluentValidationClientsideAdapters();
         services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
         return services;
-
     }
 
-    public static IServiceCollection AddAutoMapper(this IServiceCollection services)
+    public static IServiceCollection AddAutoMapperAndOtherServices(
+        this IServiceCollection services)
     {
         services.AddAutoMapper(typeof(MappingProfile));
         services.AddScoped<IProjectService, ProjectService>();
         services.AddScoped<ITaskItemService, TaskItemService>();
         services.AddScoped<IAuthService, AuthService>();
+
         return services;
+
     }
 
 }

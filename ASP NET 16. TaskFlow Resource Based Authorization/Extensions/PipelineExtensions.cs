@@ -5,7 +5,10 @@ namespace ASP_NET_16._TaskFlow_Resource_Based_Authorization.Extensions;
 
 public static class PipelineExtensions
 {
-    public static WebApplication UseTaskFlowPiple(this WebApplication app)
+
+    public static WebApplication UseTaskFlowPiplene(
+        this WebApplication app
+        )
     {
         if (app.Environment.IsDevelopment())
         {
@@ -19,7 +22,7 @@ public static class PipelineExtensions
                     options.EnableFilter();
                     options.EnableDeepLinking();
                     options.EnableTryItOutByDefault();
-                    options.EnableTryItOutByDefault();
+                    options.EnablePersistAuthorization();
                 }
                 );
         }
@@ -32,15 +35,13 @@ public static class PipelineExtensions
         app.UseAuthorization();
 
         app.MapControllers();
+
         return app;
     }
-
-    public static async Task EnsureRolesSeededAsync(this WebApplication app)
+    public static async Task EnsureRolesSeededAsync(
+        this WebApplication app)
     {
         using var scope = app.Services.CreateScope();
-
-            await RoleSeeder.SeedRolesAsync(scope.ServiceProvider);
-        
-
+        await RoleSeeder.SeedRolesAsync(scope.ServiceProvider);
     }
 }
