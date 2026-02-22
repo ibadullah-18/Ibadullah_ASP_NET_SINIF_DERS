@@ -241,7 +241,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ITaskItemService, TaskItemService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IFileStorage, LocalDiskStorage>();
-        services.AddScoped<IAttacmentService, AttachmentService>();
+        services.AddScoped<IAttachmentService, AttachmentService>();
 
         return services;
 

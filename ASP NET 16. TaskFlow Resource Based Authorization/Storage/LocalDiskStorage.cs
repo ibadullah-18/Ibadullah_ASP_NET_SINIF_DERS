@@ -49,7 +49,7 @@ public class LocalDiskStorage : IFileStorage
     {
         var fullPath = Path.Combine(_basePath, storageKey.Replace('/',Path.DirectorySeparatorChar));
 
-        if (File.Exists(fullPath))
+        if (!File.Exists(fullPath))
         {
             throw new FileNotFoundException("File not found", storageKey);
         }
